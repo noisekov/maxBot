@@ -1,25 +1,37 @@
 import { useState } from "react";
 import Login from "./pages/Login/Login";
 import Messenger from "./pages/Messenger/Messenger";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  clearApiTokenInstance,
+  selectApiTokenInstance,
+  setApiTokenInstance,
+} from "./slice/apiTokenInstanceSlice";
+import {
+  clearIdInstance,
+  selectIdInstance,
+  setIdInstance,
+} from "./slice/idInstanceSlice";
 
 const App = () => {
+  const apiTokenInstance = useSelector(selectApiTokenInstance);
+  const idInstance = useSelector(selectIdInstance);
+  const dispatch = useDispatch();
+
   const [isAuthenticated, setIsAuthenticated] = useState(() =>
-    Boolean(
-      localStorage.getItem("idInstance") &&
-      localStorage.getItem("apiTokenInstance"),
-    ),
+    Boolean(idInstance && apiTokenInstance),
   );
 
   const handleLogin = (idInstance: string, apiTokenInstance: string) => {
-    localStorage.setItem("idInstance", idInstance);
-    localStorage.setItem("apiTokenInstance", apiTokenInstance);
+    dispatch(setIdInstance(idInstance));
+    dispatch(setApiTokenInstance(apiTokenInstance));
 
     setIsAuthenticated(true);
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("idInstance");
-    localStorage.removeItem("apiTokenInstance");
+    dispatch(clearIdInstance());
+    dispatch(clearApiTokenInstance());
 
     setIsAuthenticated(false);
   };

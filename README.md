@@ -1,3 +1,3 @@
-# maxBot
+# telegramBot
 
-[deploy]('https://noisekov.github.io/maxBot/')
+[deploy]("https://noisekov.github.io/telegramBot/")
