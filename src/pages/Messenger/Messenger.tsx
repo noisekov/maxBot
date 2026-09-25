@@ -4,12 +4,19 @@ import Chat from "../../components/Chat/Chat";
 import NewChatModal from "../../components/NewChatModal/NewChatModal";
 import type { Chat as ChatType } from "../../types/chat";
 import styles from "./Messenger.module.css";
+import { API_URL } from "../../services/greenApi";
+import { useSelector } from "react-redux";
+import { selectApiTokenInstance } from "../../slice/apiTokenInstanceSlice";
+import { selectIdInstance } from "../../slice/idInstanceSlice";
 
 interface MessengerProps {
   onLogout: () => void;
 }
 
 const Messenger = ({ onLogout }: MessengerProps) => {
+  const apiTokenInstance = useSelector(selectApiTokenInstance);
+  const idInstance = useSelector(selectIdInstance);
+
   const [chats, setChats] = useState<ChatType[]>(() => {
     const TIMESTAMP_ONE_MINUTE_AGO = Date.now() - 60_000;
     const TIMESTAMP_30_SECONDS_AGO = Date.now() - 30_000;
@@ -41,13 +48,33 @@ const Messenger = ({ onLogout }: MessengerProps) => {
   const [isNewChatOpen, setIsNewChatOpen] = useState(false);
   const activeChat = chats.find((chat) => chat.id === activeChatId);
 
-  const handleSendMessage = (text: string) => {
+  const handleSendMessage = async (text: string) => {
     if (!activeChat) {
       return;
     }
 
+    const response = await fetch(
+      `${API_URL}/waInstance${idInstance}/sendMessage/${apiTokenInstance}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          chatId: activeChatId,
+          message: text,
+        }),
+      },
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to send message");
+    }
+
+    const { idMessage } = await response.json();
+
     const message = {
-      id: crypto.randomUUID(),
+      id: idMessage,
       text,
       fromMe: true,
       timestamp: Date.now(),
@@ -65,9 +92,23 @@ const Messenger = ({ onLogout }: MessengerProps) => {
     );
   };
 
-  const handleCreateChat = (phone: string) => {
+  const handleCreateChat = async (phone: string) => {
+    const responseChatID = await fetch(
+      `${API_URL}/waInstance${idInstance}/checkAccount/${apiTokenInstance}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          phoneNumber: +phone,
+        }),
+      },
+    );
+    const { chatId } = await responseChatID.json();
+
     const newChat: ChatType = {
-      id: crypto.randomUUID(),
+      id: chatId,
       phone,
       name: phone,
       messages: [],
