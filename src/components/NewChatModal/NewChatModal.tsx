@@ -8,17 +8,24 @@ interface NewChatModalProps {
 
 const NewChatModal = ({ onClose, onCreate }: NewChatModalProps) => {
   const [phone, setPhone] = useState("");
+  const [error, setError] = useState("");
 
   const handleSubmit = (event: SubmitEvent) => {
     event.preventDefault();
-
     const value = phone.replace(/\D/g, "");
 
-    if (!value) {
+    if (!value || value.length !== 11 || !value.startsWith("8")) {
+      setError("Номер должен содержать 11 цифр и начинаться с 8");
       return;
     }
 
+    setError("");
     onCreate(value);
+  };
+
+  const handlePhoneChange = (value: string) => {
+    setPhone(value);
+    setError("");
   };
 
   return (
@@ -27,25 +34,35 @@ const NewChatModal = ({ onClose, onCreate }: NewChatModalProps) => {
         className={styles.modal}
         onMouseDown={(event) => event.stopPropagation()}
       >
-        <h2>Новый чат</h2>
-
-        <p>Введите номер телефона получателя</p>
+        <h2 className={styles.title}>Новый чат</h2>
+        <p className={styles.description}>Введите номер телефона получателя</p>
 
         <form onSubmit={handleSubmit}>
           <input
+            className={styles.input}
             type="tel"
-            placeholder="79991234567"
+            placeholder="88005553535"
             value={phone}
-            onChange={(event) => setPhone(event.target.value)}
+            onChange={(event) => handlePhoneChange(event.target.value)}
             autoFocus
           />
 
+          {error && <p className={styles.error}>{error}</p>}
+
           <div className={styles.actions}>
-            <button type="button" onClick={onClose}>
+            <button
+              className={`${styles["actions-cancel"]} ${styles.button}`}
+              type="button"
+              onClick={onClose}
+            >
               Отмена
             </button>
 
-            <button type="submit" disabled={!phone.trim()}>
+            <button
+              className={`${styles["actions-create"]} ${styles.button}`}
+              type="submit"
+              disabled={!phone.trim()}
+            >
               Создать чат
             </button>
           </div>
