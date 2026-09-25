@@ -1,0 +1,36 @@
+.form {
+  display: flex;
+  gap: 10px;
+  padding: 14px 20px;
+  background: #ffffff;
+  border-top: 1px solid #e5e8ef;
+}
+
+.form input {
+  min-width: 0;
+  flex: 1;
+  padding: 12px 14px;
+  border: 1px solid #e1e5eb;
+  border-radius: 12px;
+  outline: none;
+  font-size: 14px;
+}
+
+.form input:focus {
+  border-color: #3478f6;
+}
+
+.form button {
+  width: 44px;
+  border: 0;
+  border-radius: 50%;
+  background: #3478f6;
+  color: #ffffff;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.form button:disabled {
+  background: #cbd2dc;
+  cursor: default;
+}

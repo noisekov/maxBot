@@ -1,0 +1,81 @@
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  width: 320px;
+  height: 100%;
+  background: #ffffff;
+  border-right: 1px solid #e5e8ef;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px;
+}
+
+.logo {
+  margin: 0;
+  color: #20242d;
+  font-size: 24px;
+}
+
+.newChat {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 50%;
+  background: #3478f6;
+  color: #ffffff;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.search {
+  padding: 0 16px 16px;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 11px 14px;
+  border: 0;
+  border-radius: 12px;
+  outline: none;
+  background: #f1f3f7;
+  font-size: 14px;
+}
+
+.title {
+  padding: 8px 20px;
+  color: #858c99;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.footer {
+  padding: 12px 16px;
+  border-top: 1px solid #e5e8ef;
+}
+
+.logout {
+  width: 100%;
+  padding: 10px;
+  border: 0;
+  border-radius: 10px;
+  background: #f1f3f7;
+  color: #555d6b;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.logout:hover {
+  background: #e8ebf0;
+}

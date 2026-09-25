@@ -1,0 +1,28 @@
+.message {
+  max-width: 65%;
+  padding: 9px 12px;
+  border-radius: 14px;
+}
+
+.myMessage {
+  align-self: flex-end;
+  background: #d5e8ff;
+}
+
+.otherMessage {
+  align-self: flex-start;
+  background: #ffffff;
+}
+
+.text {
+  color: #20242d;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.time {
+  margin-top: 4px;
+  color: #89919e;
+  font-size: 10px;
+  text-align: right;
+}
