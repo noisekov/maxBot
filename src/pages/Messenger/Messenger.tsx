@@ -9,17 +9,15 @@ import {
 } from "../../services/greenApi";
 import type { Chat as ChatType } from "../../types/chat";
 import styles from "./Messenger.module.css";
-import { selectIdInstance } from "../../slice/idInstanceSlice";
-import { selectApiTokenInstance } from "../../slice/apiTokenInstanceSlice";
 import { useSelector } from "react-redux";
+import { selectCredentials } from "../../slice/credentialsSlice";
 
 interface MessengerProps {
   onLogout: () => void;
 }
 
 const Messenger = ({ onLogout }: MessengerProps) => {
-  const apiTokenInstance = useSelector(selectApiTokenInstance);
-  const idInstance = useSelector(selectIdInstance);
+  const { idInstance, apiTokenInstance } = useSelector(selectCredentials);
   const [chats, setChats] = useState<ChatType[]>([]);
   const [activeChatId, setActiveChatId] = useState("1");
   const [isNewChatOpen, setIsNewChatOpen] = useState(false);
@@ -31,7 +29,10 @@ const Messenger = ({ onLogout }: MessengerProps) => {
     const receiveMessages = async () => {
       while (!stopped) {
         try {
-          const notification = await receiveNotification();
+          const notification = await receiveNotification({
+            idInstance,
+            apiTokenInstance,
+          });
 
           if (stopped) {
             break;
@@ -95,7 +96,7 @@ const Messenger = ({ onLogout }: MessengerProps) => {
             });
           }
 
-          await deleteNotification(receiptId);
+          await deleteNotification({ idInstance, apiTokenInstance }, receiptId);
         } catch (error) {
           if (stopped) {
             break;

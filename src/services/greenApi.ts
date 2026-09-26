@@ -1,4 +1,6 @@
+import type { CredentialsState } from "../slice/credentialsSlice";
 export const API_URL = import.meta.env.VITE_API_URL;
+export type Credentials = CredentialsState;
 
 interface ReceiveNotificationResponse {
   receiptId: number;
@@ -34,58 +36,38 @@ export interface IncomingNotification {
   };
 }
 
-const getCredentials = () => {
-  const idInstance = localStorage.getItem("idInstance");
-  const apiTokenInstance = localStorage.getItem("apiTokenInstance");
+const buildUrl = (idInstance: string, path: string) =>
+  `${API_URL}/waInstance${idInstance}/${path}`;
 
-  if (!idInstance || !apiTokenInstance) {
-    throw new Error("GREEN-API credentials not found");
+export async function receiveNotification({
+  idInstance,
+  apiTokenInstance,
+}: Credentials): Promise<ReceiveNotificationResponse | null> {
+  const response = await fetch(
+    buildUrl(idInstance, `receiveNotification/${apiTokenInstance}`) +
+      "?receiveTimeout=60",
+  );
+
+  if (!response.ok) {
+    throw new Error(`ReceiveNotification error: ${response.status}`);
   }
 
-  return {
-    idInstance,
-    apiTokenInstance,
-  };
-};
+  const data = await response.json();
+  return data || null;
+}
 
-export const receiveNotification =
-  async (): Promise<ReceiveNotificationResponse | null> => {
-    const { idInstance, apiTokenInstance } = getCredentials();
-
-    const url =
-      `${API_URL}/waInstance${idInstance}` +
-      `/receiveNotification/${apiTokenInstance}` +
-      "?receiveTimeout=60";
-
-    const response = await fetch(url);
-
-    if (!response.ok) {
-      throw new Error(`ReceiveNotification error: ${response.status}`);
-    }
-
-    const data = await response.json();
-
-    if (!data) {
-      return null;
-    }
-
-    return data;
-  };
-
-export const deleteNotification = async (receiptId: number) => {
-  const { idInstance, apiTokenInstance } = getCredentials();
-
-  const url =
-    `${API_URL}/waInstance${idInstance}` +
-    `/deleteNotification/${apiTokenInstance}/${receiptId}`;
-
-  const response = await fetch(url, {
-    method: "DELETE",
-  });
+export async function deleteNotification(
+  { idInstance, apiTokenInstance }: Credentials,
+  receiptId: number,
+) {
+  const response = await fetch(
+    buildUrl(idInstance, `deleteNotification/${apiTokenInstance}/${receiptId}`),
+    { method: "DELETE" },
+  );
 
   if (!response.ok) {
     throw new Error(`DeleteNotification error: ${response.status}`);
   }
 
   return response.json();
-};
+}

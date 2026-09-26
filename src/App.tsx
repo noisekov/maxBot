@@ -3,19 +3,13 @@ import Login from "./pages/Login/Login";
 import Messenger from "./pages/Messenger/Messenger";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  clearApiTokenInstance,
-  selectApiTokenInstance,
-  setApiTokenInstance,
-} from "./slice/apiTokenInstanceSlice";
-import {
-  clearIdInstance,
-  selectIdInstance,
-  setIdInstance,
-} from "./slice/idInstanceSlice";
+  clearCredentials,
+  selectCredentials,
+  setCredentials,
+} from "./slice/credentialsSlice";
 
 const App = () => {
-  const apiTokenInstance = useSelector(selectApiTokenInstance);
-  const idInstance = useSelector(selectIdInstance);
+  const { idInstance, apiTokenInstance } = useSelector(selectCredentials);
   const dispatch = useDispatch();
 
   const [isAuthenticated, setIsAuthenticated] = useState(() =>
@@ -23,15 +17,13 @@ const App = () => {
   );
 
   const handleLogin = (idInstance: string, apiTokenInstance: string) => {
-    dispatch(setIdInstance(idInstance));
-    dispatch(setApiTokenInstance(apiTokenInstance));
+    dispatch(setCredentials({ idInstance, apiTokenInstance }));
 
     setIsAuthenticated(true);
   };
 
   const handleLogout = () => {
-    dispatch(clearIdInstance());
-    dispatch(clearApiTokenInstance());
+    dispatch(clearCredentials());
 
     setIsAuthenticated(false);
   };

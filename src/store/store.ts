@@ -1,12 +1,13 @@
 import { configureStore } from "@reduxjs/toolkit";
-import apiTokenInstance from "../slice/apiTokenInstanceSlice";
-import idInstance from "../slice/idInstanceSlice";
+import credentialsReducer from "../slice/credentialsSlice";
+import { credentialsListener } from "../slice/credentialsListener";
 
 export const store = configureStore({
   reducer: {
-    apiTokenInstance,
-    idInstance,
+    credentials: credentialsReducer,
   },
+  middleware: (getDefault) =>
+    getDefault().prepend(credentialsListener.middleware),
 });
 
 export type RootState = ReturnType<typeof store.getState>;
