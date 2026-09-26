@@ -1,13 +1,17 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ChatList from "../../components/ChatList/ChatList";
 import Chat from "../../components/Chat/Chat";
 import NewChatModal from "../../components/NewChatModal/NewChatModal";
+import {
+  API_URL,
+  deleteNotification,
+  receiveNotification,
+} from "../../services/greenApi";
 import type { Chat as ChatType } from "../../types/chat";
 import styles from "./Messenger.module.css";
-import { API_URL } from "../../services/greenApi";
-import { useSelector } from "react-redux";
-import { selectApiTokenInstance } from "../../slice/apiTokenInstanceSlice";
 import { selectIdInstance } from "../../slice/idInstanceSlice";
+import { selectApiTokenInstance } from "../../slice/apiTokenInstanceSlice";
+import { useSelector } from "react-redux";
 
 interface MessengerProps {
   onLogout: () => void;
@@ -16,56 +20,117 @@ interface MessengerProps {
 const Messenger = ({ onLogout }: MessengerProps) => {
   const apiTokenInstance = useSelector(selectApiTokenInstance);
   const idInstance = useSelector(selectIdInstance);
-
-  const [chats, setChats] = useState<ChatType[]>(() => {
-    const TIMESTAMP_ONE_MINUTE_AGO = Date.now() - 60_000;
-    const TIMESTAMP_30_SECONDS_AGO = Date.now() - 30_000;
-
-    return [
-      {
-        id: "1",
-        phone: "79991234567",
-        name: "Алексей",
-        messages: [
-          {
-            id: "1",
-            text: "Привет! Как дела?",
-            fromMe: false,
-            timestamp: TIMESTAMP_ONE_MINUTE_AGO,
-          },
-          {
-            id: "2",
-            text: "Привет! Всё отлично, спасибо!",
-            fromMe: true,
-            timestamp: TIMESTAMP_30_SECONDS_AGO,
-          },
-        ],
-      },
-    ];
-  });
-
+  const [chats, setChats] = useState<ChatType[]>([]);
   const [activeChatId, setActiveChatId] = useState("1");
   const [isNewChatOpen, setIsNewChatOpen] = useState(false);
   const activeChat = chats.find((chat) => chat.id === activeChatId);
+
+  useEffect(() => {
+    let stopped = false;
+
+    const receiveMessages = async () => {
+      while (!stopped) {
+        try {
+          const notification = await receiveNotification();
+
+          if (stopped) {
+            break;
+          }
+
+          if (!notification) {
+            continue;
+          }
+
+          const { receiptId, body } = notification;
+
+          const isIncomingTextMessage =
+            body.typeWebhook === "incomingMessageReceived" &&
+            body.messageData.typeMessage === "textMessage" &&
+            Boolean(body.messageData.textMessageData?.textMessage);
+
+          if (isIncomingTextMessage) {
+            const text = body.messageData.textMessageData!.textMessage;
+            const phone = String(body.senderData.senderPhoneNumber);
+
+            const MILLIS_TO_SECONDS = 1000;
+            const message = {
+              id: body.idMessage,
+              text,
+              fromMe: false,
+              timestamp: body.timestamp * MILLIS_TO_SECONDS,
+            };
+
+            setChats((currentChats) => {
+              const chatExists = currentChats.some(
+                (chat) => chat.phone === phone,
+              );
+
+              if (!chatExists) {
+                return [
+                  ...currentChats,
+                  {
+                    id: body.senderData.chatId,
+                    phone,
+                    name: body.senderData.senderName || phone,
+                    messages: [message],
+                  },
+                ];
+              }
+
+              return currentChats.map((chat) =>
+                chat.phone === phone
+                  ? {
+                      ...chat,
+                      name: body.senderData.senderName || chat.name,
+                      messages: [...chat.messages, message],
+                    }
+                  : chat,
+              );
+            });
+
+            setActiveChatId((currentId) => {
+              const chat = chats.find((item) => item.phone === phone);
+
+              return chat?.id ?? currentId;
+            });
+          }
+
+          await deleteNotification(receiptId);
+        } catch (error) {
+          if (stopped) {
+            break;
+          }
+
+          console.error("GREEN-API receiving error:", error);
+
+          await new Promise((resolve) => setTimeout(resolve, 3000));
+        }
+      }
+    };
+
+    receiveMessages();
+
+    return () => {
+      stopped = true;
+    };
+  }, []);
 
   const handleSendMessage = async (text: string) => {
     if (!activeChat) {
       return;
     }
 
-    const response = await fetch(
-      `${API_URL}/waInstance${idInstance}/sendMessage/${apiTokenInstance}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          chatId: activeChatId,
-          message: text,
-        }),
+    const url = `${API_URL}/waInstance${idInstance}/sendMessage/${apiTokenInstance}`;
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
       },
-    );
+      body: JSON.stringify({
+        chatId: activeChatId,
+        message: text,
+      }),
+    });
 
     if (!response.ok) {
       throw new Error("Failed to send message");

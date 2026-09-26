@@ -13,9 +13,6 @@ export const apiTokenInstance = createSlice({
   name: "apiTokenInstance",
   initialState,
   reducers: {
-    getApiTokenInstance: (state) => {
-      return state;
-    },
     setApiTokenInstance: (state, action: PayloadAction<string>) => {
       state.value = action.payload;
       localStorage.setItem("apiTokenInstance", action.payload);
@@ -27,11 +24,8 @@ export const apiTokenInstance = createSlice({
   },
 });
 
-export const {
-  getApiTokenInstance,
-  setApiTokenInstance,
-  clearApiTokenInstance,
-} = apiTokenInstance.actions;
+export const { setApiTokenInstance, clearApiTokenInstance } =
+  apiTokenInstance.actions;
 
 export const selectApiTokenInstance = (state: {
   apiTokenInstance: ApiTokenInstanceState;

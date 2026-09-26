@@ -13,9 +13,6 @@ export const idInstance = createSlice({
   name: "idInstance",
   initialState,
   reducers: {
-    getIdInstance: (state) => {
-      return state;
-    },
     setIdInstance: (state, action: PayloadAction<string>) => {
       state.value = action.payload;
       localStorage.setItem("idInstance", action.payload);
@@ -27,8 +24,7 @@ export const idInstance = createSlice({
   },
 });
 
-export const { getIdInstance, setIdInstance, clearIdInstance } =
-  idInstance.actions;
+export const { setIdInstance, clearIdInstance } = idInstance.actions;
 
 export const selectIdInstance = (state: { idInstance: ApiIdInstanceState }) =>
   state.idInstance.value;
