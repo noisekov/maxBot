@@ -2,13 +2,29 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  min-width: 0;
   padding: 14px 20px;
   background: #ffffff;
   border-bottom: 1px solid #e5e8ef;
 }
 
+.back {
+  display: none;
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #f1f3f7;
+  color: #20242d;
+  font-size: 20px;
+  cursor: pointer;
+}
+
 .avatar {
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
   width: 42px;
@@ -19,14 +35,37 @@
   font-size: 17px;
 }
 
+.info {
+  min-width: 0;
+}
+
 .name {
+  overflow: hidden;
   color: #20242d;
   font-size: 15px;
   font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .phone {
+  overflow: hidden;
   margin-top: 3px;
   color: #858c99;
   font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
+
+@media (max-width: 768px) {
+  .back {
+    display: block;
+  }
+}
+
+@media (max-width: 550px) {
+  .header {
+    padding: 10px 12px;
+  }
+}
+

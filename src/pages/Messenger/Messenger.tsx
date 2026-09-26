@@ -19,7 +19,7 @@ interface MessengerProps {
 const Messenger = ({ onLogout }: MessengerProps) => {
   const { idInstance, apiTokenInstance } = useSelector(selectCredentials);
   const [chats, setChats] = useState<ChatType[]>([]);
-  const [activeChatId, setActiveChatId] = useState("1");
+  const [activeChatId, setActiveChatId] = useState("");
   const [isNewChatOpen, setIsNewChatOpen] = useState(false);
   const activeChat = chats.find((chat) => chat.id === activeChatId);
 
@@ -60,6 +60,7 @@ const Messenger = ({ onLogout }: MessengerProps) => {
               fromMe: false,
               timestamp: body.timestamp * MILLIS_TO_SECONDS,
             };
+            const chatId = body.senderData.chatId;
 
             setChats((currentChats) => {
               const chatExists = currentChats.some(
@@ -70,7 +71,7 @@ const Messenger = ({ onLogout }: MessengerProps) => {
                 return [
                   ...currentChats,
                   {
-                    id: body.senderData.chatId,
+                    id: chatId,
                     phone,
                     name: body.senderData.senderName || phone,
                     messages: [message],
@@ -89,14 +90,16 @@ const Messenger = ({ onLogout }: MessengerProps) => {
               );
             });
 
-            setActiveChatId((currentId) => {
-              const chat = chats.find((item) => item.phone === phone);
-
-              return chat?.id ?? currentId;
-            });
+            setActiveChatId(chatId);
           }
 
-          await deleteNotification({ idInstance, apiTokenInstance }, receiptId);
+          await deleteNotification(
+            {
+              idInstance,
+              apiTokenInstance,
+            },
+            receiptId,
+          );
         } catch (error) {
           if (stopped) {
             break;
@@ -114,7 +117,7 @@ const Messenger = ({ onLogout }: MessengerProps) => {
     return () => {
       stopped = true;
     };
-  }, []);
+  }, [idInstance, apiTokenInstance]);
 
   const handleSendMessage = async (text: string) => {
     if (!activeChat) {
@@ -128,7 +131,7 @@ const Messenger = ({ onLogout }: MessengerProps) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        chatId: activeChatId,
+        chatId: activeChat.id,
         message: text,
       }),
     });
@@ -159,6 +162,14 @@ const Messenger = ({ onLogout }: MessengerProps) => {
   };
 
   const handleCreateChat = async (phone: string) => {
+    const existingChat = chats.find((chat) => chat.phone === phone);
+
+    if (existingChat) {
+      setActiveChatId(existingChat.id);
+      setIsNewChatOpen(false);
+      return;
+    }
+
     const responseChatID = await fetch(
       `${API_URL}/waInstance${idInstance}/checkAccount/${apiTokenInstance}`,
       {
@@ -171,6 +182,11 @@ const Messenger = ({ onLogout }: MessengerProps) => {
         }),
       },
     );
+
+    if (!responseChatID.ok) {
+      throw new Error("Failed to check account");
+    }
+
     const { chatId } = await responseChatID.json();
 
     const newChat: ChatType = {
@@ -185,25 +201,45 @@ const Messenger = ({ onLogout }: MessengerProps) => {
     setIsNewChatOpen(false);
   };
 
+  const handleBackToChats = () => {
+    setActiveChatId("");
+  };
+
   return (
     <div className={styles.messenger}>
-      <ChatList
-        chats={chats}
-        activeChatId={activeChatId}
-        onChatSelect={setActiveChatId}
-        onNewChat={() => setIsNewChatOpen(true)}
-        onLogout={onLogout}
-      />
+      <div
+        className={`${styles.chatListWrapper} ${
+          activeChat ? styles.chatListHidden : ""
+        }`}
+      >
+        <ChatList
+          chats={chats}
+          activeChatId={activeChatId}
+          onChatSelect={setActiveChatId}
+          onNewChat={() => setIsNewChatOpen(true)}
+          onLogout={onLogout}
+        />
+      </div>
 
-      {activeChat ? (
-        <Chat chat={activeChat} onSendMessage={handleSendMessage} />
-      ) : (
-        <div className={styles.empty}>
-          <h2 className={styles.emptyTitle}>Выберите чат</h2>
+      <div
+        className={`${styles.chatWrapper} ${
+          activeChat ? styles.chatVisible : ""
+        }`}
+      >
+        {activeChat ? (
+          <Chat
+            chat={activeChat}
+            onSendMessage={handleSendMessage}
+            onBack={handleBackToChats}
+          />
+        ) : (
+          <div className={styles.empty}>
+            <h2 className={styles.emptyTitle}>Выберите чат</h2>
 
-          <p className={styles.emptyText}>Или создайте новый чат</p>
-        </div>
-      )}
+            <p className={styles.emptyText}>Или создайте новый чат</p>
+          </div>
+        )}
+      </div>
 
       {isNewChatOpen && (
         <NewChatModal

@@ -24,13 +24,19 @@ const MessageInput = ({ onSend }: MessageInputProps) => {
   return (
     <form className={styles.form} onSubmit={handleSubmit}>
       <input
+        className={styles.input}
         type="text"
         value={text}
         placeholder="Написать сообщение..."
         onChange={(event) => setText(event.target.value)}
       />
 
-      <button type="submit" disabled={!text.trim()}>
+      <button
+        className={styles.button}
+        type="submit"
+        disabled={!text.trim()}
+        aria-label="Отправить сообщение"
+      >
         ➤
       </button>
     </form>

@@ -7,12 +7,13 @@ import styles from "./Chat.module.css";
 interface ChatProps {
   chat: ChatType;
   onSendMessage: (text: string) => void;
+  onBack: () => void;
 }
 
-const Chat = ({ chat, onSendMessage }: ChatProps) => {
+const Chat = ({ chat, onSendMessage, onBack }: ChatProps) => {
   return (
     <section className={styles.chat}>
-      <ChatHeader chat={chat} />
+      <ChatHeader chat={chat} onBack={onBack} />
 
       <div className={styles.messages}>
         {chat.messages.map((message) => (
