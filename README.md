@@ -6,12 +6,28 @@
 
 Тестовое приложение для отправки и получения сообщений через [Green API](https://green-api.com/).
 
+## Установка
+
+Склонируйте репозиторий:
+
+```bash
+git clone https://github.com/noisekov/telegramBot.git
+```
+
+
+
+Перейдите в папку проекта:
+
+```bash
+cd telegramBot
+```
+
 ## Настройка API
 
 Перед запуском проекта создайте файл `.env` в корне проекта:
 
 ```env
-VITE_API_URL=https://9999.api.green-api.com
+VITE_API_URL= "https://9999.api.green-api.com"
 ```
 
 Вместо `https://9999.api.green-api.com` укажите ваш `apiUrl` из Green API.
@@ -30,7 +46,7 @@ npm install
 npm run dev
 ```
 
-После запуска откройте приложение в браузере.
+После запуска откройте приложение в браузере по адресу [http://localhost:5173/](http://localhost:5173/).
 
 ## Авторизация
 
