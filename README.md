@@ -1,3 +1,4 @@
+<img width="786" height="342" alt="образец" src="https://github.com/user-attachments/assets/42df1884-e172-47b6-98c7-4bf57f41da04" />
 # telegramBot
 
 [Deploy](https://noisekov.github.io/telegramBot/)
